@@ -3,6 +3,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from 'react-native';
 
 import { BrandColor } from '@/constants/theme';
+import { useTabBarColors } from '@/hooks/use-native-colors';
 import { BettingProvider, useBetting } from '@/store/betting';
 
 export default function RootLayout() {
@@ -19,9 +20,10 @@ export default function RootLayout() {
 
 function AppTabs() {
   const { selections } = useBetting();
+  const tabBarColors = useTabBarColors();
 
   return (
-    <NativeTabs tintColor={BrandColor}>
+    <NativeTabs tintColor={BrandColor} {...tabBarColors}>
       <NativeTabs.Trigger name="(index)">
         <NativeTabs.Trigger.Icon sf="sportscourt.fill" md="sports" />
         <NativeTabs.Trigger.Label>Sports</NativeTabs.Trigger.Label>

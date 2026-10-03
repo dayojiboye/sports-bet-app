@@ -44,7 +44,11 @@ Each group has its own `Stack` for native headers. Shared header options are in 
 
 Sports and Live are one array group, `(index,live)`, so both tabs can push the shared `match/[id]` screen. Its layout uses the `segment` prop and `unstable_settings` anchors to choose which screen each copy of the stack starts on.
 
-**Screen shape.** Every screen is an `AppHost` (an Expo UI `Host` with the brand `seedColor`) wrapping one `FieldGroup` of `FieldGroup.Section`s. `FieldGroup` renders as a SwiftUI `Form` on iOS and a Material 3 grouped `LazyColumn` on Android. Each child of a section is one row.
+**Screen shape.** Every screen is an `AppHost` wrapping one `FieldGroup` of `FieldGroup.Section`s. `AppHost` is an Expo UI `Host` with the brand `seedColor` and the current `colorScheme`. `FieldGroup` renders as a SwiftUI `Form` on iOS and a Material 3 grouped `LazyColumn` on Android. Each child of a section is one row.
+
+**Dark mode on Android.** Anything that reads the color scheme only once goes stale when dark mode is toggled while the app runs, and only a reload fixes it. To keep native colors in step with the JS-drawn ones:
+- `AppHost` passes the scheme from `useColorScheme()` instead of letting the native theme detect it.
+- The tab bar and bottom sheets take colors from `useMaterialColors()` (see `use-native-colors` below).
 
 **Expo UI constraints.**
 - **Platform-specific imports.** Import `@expo/ui/swift-ui` or `@expo/ui/jetpack-compose` only inside a platform-split pair: `foo.ios.tsx` plus a plain `foo.tsx`, which serves as the Android version. Importing them on the wrong platform crashes at runtime. Current pairs:
@@ -55,9 +59,14 @@ Sports and Live are one array group, `(index,live)`, so both tabs can push the s
     - iOS uses the native continuous SF Symbol `symbolEffect` pulse.
     - Compose modifiers can't loop, so on Android one shared JS timer flips an `animated()` `graphicsLayer` alpha and Compose runs each fade.
     - Both skip the pulse when Reduce Motion is on.
+  - `src/hooks/use-native-colors`: `useTabBarColors()` and `useSheetColors()`.
+    - Android: colors from the seeded Material palette, which re-render when the scheme changes. The default tab bar colors are cached and never re-themed.
+    - iOS: returns `{}`, so the system tab bar (Liquid Glass) and sheets adapt on their own.
 - **`Text` children** must be a single string. Use template literals, not JSX interpolation.
 - **Bottom sheets.** Use `AppBottomSheet` and render it as a sibling of `AppHost`, not inside it, because the sheet creates its own `Host`.
-  - Theming: the sheet doesn't get the `seedColor`. On iOS, `sheetTint` restores the brand tint; on Android the sheet uses the system Material palette.
+  - Theming: the sheet doesn't get the `seedColor`.
+    - iOS: `sheetTint` restores the brand tint.
+    - Android: `useSheetColors()` sets the sheet background and text colors, but buttons inside the sheet use the system Material palette.
   - State: keep the sheet's content data separate from `isPresented`. Android animates the sheet out after `isPresented` turns false.
 - **Icons.**
   - Content icons are declared in `src/components/icons.ts` with `Icon.select({ ios: '<SF Symbol>', android: import('@expo/material-symbols/<name>.xml') })`. The `@expo/ui` Babel plugin rewrites the `import()`.
