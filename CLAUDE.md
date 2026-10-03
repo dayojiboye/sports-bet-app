@@ -47,9 +47,14 @@ Sports and Live are one array group, `(index,live)`, so both tabs can push the s
 **Screen shape.** Every screen is an `AppHost` (an Expo UI `Host` with the brand `seedColor`) wrapping one `FieldGroup` of `FieldGroup.Section`s. `FieldGroup` renders as a SwiftUI `Form` on iOS and a Material 3 grouped `LazyColumn` on Android. Each child of a section is one row.
 
 **Expo UI constraints.**
-- **Platform-specific imports.** Never import `@expo/ui/swift-ui` or `@expo/ui/jetpack-compose` outside `src/components/ui/modifiers.ts` (Android) and `modifiers.ios.ts`. Importing them on the wrong platform crashes at runtime. Both files export the same names:
-  - `stretch`: equal-width and full-width layout, which the universal `style` prop can't express because it only takes fixed sizes. Buttons need two halves: `stretch.rowItem` or `stretch.fullWidthButton` on the `Button`, and `stretch.buttonContent` on its child.
-  - `sheetTint`
+- **Platform-specific imports.** Import `@expo/ui/swift-ui` or `@expo/ui/jetpack-compose` only inside a platform-split pair: `foo.ios.tsx` plus a plain `foo.tsx`, which serves as the Android version. Importing them on the wrong platform crashes at runtime. Current pairs:
+  - `src/components/ui/modifiers`:
+    - `stretch`: equal-width and full-width layout, which the universal `style` prop can't express because it only takes fixed sizes. Buttons need two halves: `stretch.rowItem` or `stretch.fullWidthButton` on the `Button`, and `stretch.buttonContent` on its child.
+    - `sheetTint`
+  - `src/components/live-dot`, the pulsing dot in the LIVE badge:
+    - iOS uses the native continuous SF Symbol `symbolEffect` pulse.
+    - Compose modifiers can't loop, so on Android one shared JS timer flips an `animated()` `graphicsLayer` alpha and Compose runs each fade.
+    - Both skip the pulse when Reduce Motion is on.
 - **`Text` children** must be a single string. Use template literals, not JSX interpolation.
 - **Bottom sheets.** Use `AppBottomSheet` and render it as a sibling of `AppHost`, not inside it, because the sheet creates its own `Host`.
   - Theming: the sheet doesn't get the `seedColor`. On iOS, `sheetTint` restores the brand tint; on Android the sheet uses the system Material palette.

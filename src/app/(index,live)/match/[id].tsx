@@ -2,7 +2,7 @@ import { Column, FieldGroup, Row, Spacer, Text } from '@expo/ui';
 import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { AppHost } from '@/components/app-host';
-import { MatchStatusText } from '@/components/match-row';
+import { MatchStatusLabel } from '@/components/match-row';
 import { OddsButton } from '@/components/odds-button';
 import { stretch } from '@/components/ui/modifiers';
 import { Spacing, Typography } from '@/constants/theme';
@@ -56,7 +56,7 @@ function Scoreboard({ match }: { match: Match }) {
 
   return (
     <Column alignment="center" spacing={Spacing.two} modifiers={stretch.fullWidth}>
-      <MatchStatusText status={match.status} />
+      <MatchStatusLabel status={match.status} />
       <Text textStyle={title}>{match.home}</Text>
       <Text textStyle={title}>
         {match.status.state === 'live' ? match.status.score.join('  –  ') : 'v'}

@@ -14,12 +14,14 @@ export const Colors = {
   light: {
     textSecondary: '#6B7280',
     live: '#DC2626',
+    onLive: '#FFFFFF',
     won: '#16A34A',
     lost: '#DC2626',
   },
   dark: {
     textSecondary: '#9CA3AF',
-    live: '#F87171',
+    live: '#EF4444',
+    onLive: '#FFFFFF',
     won: '#4ADE80',
     lost: '#F87171',
   },
