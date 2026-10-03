@@ -1,31 +1,27 @@
-import { BottomSheet, type BottomSheetProps } from '@expo/ui';
+import { BottomSheet, Column, type BottomSheetProps } from '@expo/ui';
 import { Platform } from 'react-native';
 
-import { sheetTint } from '@/components/ui/modifiers';
+import { sheetTint, stretch } from '@/components/ui/modifiers';
 import { Spacing } from '@/constants/theme';
-import { useSheetColors } from '@/hooks/use-native-colors';
 
+// Added on top of the sheet's built-in 16pt inset. iOS overlays the drag indicator on the
+// content, so it needs extra space at the top; Android reserves space for its handle.
 const CONTENT_PADDING = {
-  // iOS overlays the drag indicator on the content; Android reserves space for it.
-  top: Platform.OS === 'ios' ? Spacing.five : 0,
-  bottom: Spacing.four,
-  left: Spacing.four,
-  right: Spacing.four,
+  paddingTop: Platform.OS === 'ios' ? Spacing.three : 0,
+  paddingBottom: Spacing.four,
+  paddingHorizontal: Spacing.two,
 };
 
 /**
- * `BottomSheet` with the app's padding, brand tint (iOS) and palette colors (Android). Render
- * it as a sibling of the screen's `AppHost`, not inside it: the sheet creates its own `Host`.
+ * `BottomSheet` with the app's padding and brand tint (iOS). Render it as a sibling of the
+ * screen's `AppHost`, not inside it: the sheet creates its own `Host`.
  */
-export function AppBottomSheet(props: BottomSheetProps) {
-  const sheetColors = useSheetColors();
-
+export function AppBottomSheet({ children, ...props }: BottomSheetProps) {
   return (
-    <BottomSheet
-      contentPadding={CONTENT_PADDING}
-      modifiers={sheetTint}
-      {...sheetColors}
-      {...props}
-    />
+    <BottomSheet modifiers={sheetTint} {...props}>
+      <Column style={CONTENT_PADDING} modifiers={stretch.fullWidth}>
+        {children}
+      </Column>
+    </BottomSheet>
   );
 }

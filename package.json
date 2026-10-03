@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/material-symbols": "^0.1.1",
-    "@expo/ui": "~57.0.21",
+    "@expo/ui": "57.0.11",
     "expo": "~57.0.26",
     "expo-constants": "~57.0.20",
     "expo-device": "~57.0.2",
@@ -40,5 +40,15 @@
     "ios": "expo start --ios",
     "lint": "expo lint"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "@expo/ui": "$@expo/ui"
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "@expo/ui"
+      ]
+    }
+  }
 }

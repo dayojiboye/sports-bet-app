@@ -1,17 +1,6 @@
-import {
-  Button,
-  Column,
-  FieldGroup,
-  Icon,
-  Row,
-  Spacer,
-  Text,
-  TextInput,
-  useNativeState,
-  type TextInputRef,
-} from '@expo/ui';
+import { Button, Column, FieldGroup, Icon, Row, Spacer, Text, TextInput } from '@expo/ui';
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { AppBottomSheet } from '@/components/app-bottom-sheet';
 import { AppHost } from '@/components/app-host';
@@ -36,9 +25,10 @@ export default function BetSlipScreen() {
   const theme = useTheme();
   const { selections, balance, clearSelections, placeBet, formatOdds } = useBetting();
 
-  const stakeInput = useNativeState('');
-  const stakeInputRef = useRef<TextInputRef>(null);
   const [stake, setStake] = useState(0);
+  // The stake field is uncontrolled. Changing its key remounts it with `stake` as the
+  // default value, which is how quick stakes and placing a bet update it.
+  const [stakeInputKey, setStakeInputKey] = useState(0);
   const [receipt, setReceipt] = useState<Bet>();
   const [isReceiptPresented, setIsReceiptPresented] = useState(false);
 
@@ -47,13 +37,11 @@ export default function BetSlipScreen() {
   const slipTitle = `${betTitle({ selections })} · ${selections.length} selected`;
 
   function updateStake(value: number) {
-    const rounded = Math.round(value * 100) / 100;
-    setStake(rounded);
-    stakeInput.set(rounded > 0 ? String(rounded) : '');
+    setStake(Math.round(value * 100) / 100);
+    setStakeInputKey((key) => key + 1);
   }
 
   function handlePlaceBet() {
-    stakeInputRef.current?.blur();
     setReceipt(placeBet(stake));
     setIsReceiptPresented(true);
     updateStake(0);
@@ -86,8 +74,8 @@ export default function BetSlipScreen() {
                 <Row alignment="center" spacing={Spacing.two}>
                   <Text textStyle={Typography.title}>₦</Text>
                   <TextInput
-                    ref={stakeInputRef}
-                    value={stakeInput}
+                    key={stakeInputKey}
+                    defaultValue={stake > 0 ? String(stake) : undefined}
                     onChangeText={(text) => setStake(Number(text.replace(/,/g, '')) || 0)}
                     placeholder="0.00"
                     keyboardType="decimal-pad"

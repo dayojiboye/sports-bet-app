@@ -14,6 +14,12 @@ This is a UI-only sports betting app covering football, basketball and tennis. A
 
 Stack: Expo SDK 57, React Native 0.86, React 19.2 with React Compiler, TypeScript 6 (strict). The package manager is npm, so use `npx`.
 
+**`@expo/ui` is pinned to 57.0.11 on purpose.** The app runs in Expo Go, and the last SDK 57 Expo Go build (57.0.9) contains `@expo/ui` 57.0.11 native code. Newer JS (from 57.0.15) sends colors and backgrounds in a format that native code can't read, so on iOS every `textStyle.color`, `style.backgroundColor` and `Icon` `color` was silently dropped. To keep the pin in place:
+- `package.json` excludes `@expo/ui` from `expo install`/`expo-doctor` version checks (`expo.install.exclude`).
+- `package.json` overrides `expo-router`'s own `@expo/ui` dependency to the same version (`overrides`).
+- Don't upgrade `@expo/ui` unless the app moves to a development build or a newer SDK's Expo Go.
+- Check component APIs against the installed 57.0.11 types. Newer docs describe props that don't exist here, such as `BottomSheet` `contentPadding` and `containerColor`, or `ObservableState.set()`.
+
 ## Commands
 
 ```bash
@@ -48,7 +54,7 @@ Sports and Live are one array group, `(index,live)`, so both tabs can push the s
 
 **Dark mode on Android.** Anything that reads the color scheme only once goes stale when dark mode is toggled while the app runs, and only a reload fixes it. To keep native colors in step with the JS-drawn ones:
 - `AppHost` passes the scheme from `useColorScheme()` instead of letting the native theme detect it.
-- The tab bar and bottom sheets take colors from `useMaterialColors()` (see `use-native-colors` below).
+- The tab bar takes its colors from `useMaterialColors()` (see `use-native-colors` below). Bottom sheets can't be given a scheme or colors in 57.0.11, so they follow the system.
 
 **Expo UI constraints.**
 - **Platform-specific imports.** Import `@expo/ui/swift-ui` or `@expo/ui/jetpack-compose` only inside a platform-split pair: `foo.ios.tsx` plus a plain `foo.tsx`, which serves as the Android version. Importing them on the wrong platform crashes at runtime. Current pairs:
@@ -59,14 +65,15 @@ Sports and Live are one array group, `(index,live)`, so both tabs can push the s
     - iOS uses the native continuous SF Symbol `symbolEffect` pulse.
     - Compose modifiers can't loop, so on Android one shared JS timer flips an `animated()` `graphicsLayer` alpha and Compose runs each fade.
     - Both skip the pulse when Reduce Motion is on.
-  - `src/hooks/use-native-colors`: `useTabBarColors()` and `useSheetColors()`.
+  - `src/hooks/use-native-colors`: `useTabBarColors()`.
     - Android: colors from the seeded Material palette, which re-render when the scheme changes. The default tab bar colors are cached and never re-themed.
-    - iOS: returns `{}`, so the system tab bar (Liquid Glass) and sheets adapt on their own.
+    - iOS: returns `{}`, so the system tab bar (Liquid Glass) adapts on its own.
 - **`Text` children** must be a single string. Use template literals, not JSX interpolation.
 - **Bottom sheets.** Use `AppBottomSheet` and render it as a sibling of `AppHost`, not inside it, because the sheet creates its own `Host`.
   - Theming: the sheet doesn't get the `seedColor`.
     - iOS: `sheetTint` restores the brand tint.
-    - Android: `useSheetColors()` sets the sheet background and text colors, but buttons inside the sheet use the system Material palette.
+    - Android: the sheet uses the system Material palette.
+  - Padding: `AppBottomSheet` wraps the content in a padded `Column`, because 57.0.11 has no `contentPadding` prop.
   - State: keep the sheet's content data separate from `isPresented`. Android animates the sheet out after `isPresented` turns false.
 - **Icons.**
   - Content icons are declared in `src/components/icons.ts` with `Icon.select({ ios: '<SF Symbol>', android: import('@expo/material-symbols/<name>.xml') })`. The `@expo/ui` Babel plugin rewrites the `import()`.
