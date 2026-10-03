@@ -4,7 +4,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { AppHost } from '@/components/app-host';
 import { MatchStatusText } from '@/components/match-row';
 import { OddsButton } from '@/components/odds-button';
-import { stretch } from '@/components/ui/stretch';
+import { stretch } from '@/components/ui/modifiers';
 import { Spacing, Typography } from '@/constants/theme';
 import { getMatch } from '@/data/matches';
 import type { Match } from '@/data/types';

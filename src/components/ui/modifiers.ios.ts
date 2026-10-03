@@ -1,15 +1,20 @@
 import type { UniversalBaseProps } from '@expo/ui';
-import { controlSize, frame } from '@expo/ui/swift-ui/modifiers';
+import { controlSize, frame, tint } from '@expo/ui/swift-ui/modifiers';
+
+import { BrandColor } from '@/constants/theme';
 
 type Modifiers = NonNullable<UniversalBaseProps['modifiers']>;
 
-/** iOS version of `stretch.ts`. */
+/* iOS version of `modifiers.ts`. */
+
 export const stretch: Record<
-  'rowButton' | 'fullWidthButton' | 'buttonContent' | 'fullWidth',
+  'rowItem' | 'fullWidthButton' | 'buttonContent' | 'fullWidth',
   Modifiers
 > = {
-  rowButton: [],
+  rowItem: [],
   fullWidthButton: [controlSize('large')],
   buttonContent: [frame({ maxWidth: Infinity })],
   fullWidth: [frame({ maxWidth: Infinity })],
 };
+
+export const sheetTint: Modifiers = [tint(BrandColor)];

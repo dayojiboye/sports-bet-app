@@ -19,3 +19,18 @@ export const SportIcons: Record<Sport, IconSource> = {
     android: import('@expo/material-symbols/sports_tennis.xml'),
   }),
 };
+
+export const CloseIcon = Icon.select({
+  ios: 'xmark.circle.fill',
+  android: import('@expo/material-symbols/close.xml'),
+});
+
+export const SuccessIcon = Icon.select({
+  ios: 'checkmark.circle.fill',
+  android: import('@expo/material-symbols/check_circle.xml'),
+});
+
+export const BetSlipIcon = Icon.select({
+  ios: 'ticket',
+  android: import('@expo/material-symbols/receipt_long.xml'),
+});

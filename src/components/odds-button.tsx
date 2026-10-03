@@ -1,6 +1,6 @@
 import { Button, Column, Text } from '@expo/ui';
 
-import { stretch } from '@/components/ui/stretch';
+import { stretch } from '@/components/ui/modifiers';
 import { Spacing, Typography } from '@/constants/theme';
 import type { Market, Match, Outcome } from '@/data/types';
 import { useBetting } from '@/store/betting';
@@ -23,7 +23,7 @@ export function OddsButton({ match, market, outcome, label, fill = false }: Odds
     <Button
       variant={isSelected(outcome.id) ? 'filled' : 'outlined'}
       onPress={() => toggleSelection(match, market, outcome)}
-      modifiers={fill ? stretch.rowButton : undefined}>
+      modifiers={fill ? stretch.rowItem : undefined}>
       <Column
         alignment="center"
         spacing={Spacing.half}
