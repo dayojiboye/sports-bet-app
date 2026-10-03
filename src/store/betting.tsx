@@ -25,7 +25,7 @@ type BettingAction =
   | { type: 'setOddsFormat'; oddsFormat: OddsFormat };
 
 const initialState: BettingState = {
-  balance: 250,
+  balance: 50_000,
   selections: [],
   bets: SEED_BETS,
   oddsFormat: 'decimal',
@@ -56,7 +56,9 @@ function reducer(state: BettingState, action: BettingAction): BettingState {
     case 'removeSelection':
       return {
         ...state,
-        selections: state.selections.filter((selection) => selection.outcomeId !== action.outcomeId),
+        selections: state.selections.filter(
+          (selection) => selection.outcomeId !== action.outcomeId
+        ),
       };
     case 'clearSelections':
       return { ...state, selections: [] };

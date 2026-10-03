@@ -1,6 +1,9 @@
 import type { OddsFormat } from '@/data/types';
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+const amount = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 const dateTime = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
@@ -9,8 +12,9 @@ const dateTime = new Intl.DateTimeFormat('en-US', {
   hour12: false,
 });
 
-export function formatMoney(amount: number): string {
-  return money.format(amount);
+/** Formats Naira, e.g. 2500 → "₦2,500.00". */
+export function formatMoney(value: number): string {
+  return `₦${amount.format(value)}`;
 }
 
 export function formatDateTime(iso: string): string {
