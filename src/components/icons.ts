@@ -34,3 +34,8 @@ export const BetSlipIcon = Icon.select({
   ios: 'ticket',
   android: import('@expo/material-symbols/receipt_long.xml'),
 });
+
+export const AccountIcon = Icon.select({
+  ios: 'person.crop.circle.fill',
+  android: import('@expo/material-symbols/account_circle.xml'),
+});

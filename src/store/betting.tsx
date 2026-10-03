@@ -22,6 +22,7 @@ type BettingAction =
   | { type: 'placeBet'; bet: Bet }
   | { type: 'cashOut'; betId: string; amount: number }
   | { type: 'deposit'; amount: number }
+  | { type: 'withdraw'; amount: number }
   | { type: 'setOddsFormat'; oddsFormat: OddsFormat };
 
 const initialState: BettingState = {
@@ -79,6 +80,8 @@ function reducer(state: BettingState, action: BettingAction): BettingState {
       };
     case 'deposit':
       return { ...state, balance: state.balance + action.amount };
+    case 'withdraw':
+      return { ...state, balance: Math.max(0, state.balance - action.amount) };
     case 'setOddsFormat':
       return { ...state, oddsFormat: action.oddsFormat };
   }
@@ -93,6 +96,7 @@ type BettingContextValue = BettingState & {
   placeBet: (stake: number) => Bet;
   cashOut: (bet: Bet) => void;
   deposit: (amount: number) => void;
+  withdraw: (amount: number) => void;
   setOddsFormat: (oddsFormat: OddsFormat) => void;
   /** Formats decimal odds in the user's preferred format. */
   formatOdds: (odds: number) => string;
@@ -126,6 +130,7 @@ export function BettingProvider({ children }: { children: ReactNode }) {
     },
     cashOut: (bet) => dispatch({ type: 'cashOut', betId: bet.id, amount: cashOutOffer(bet) }),
     deposit: (amount) => dispatch({ type: 'deposit', amount }),
+    withdraw: (amount) => dispatch({ type: 'withdraw', amount }),
     setOddsFormat: (oddsFormat) => dispatch({ type: 'setOddsFormat', oddsFormat }),
     formatOdds: (odds) => formatOdds(odds, state.oddsFormat),
   };
