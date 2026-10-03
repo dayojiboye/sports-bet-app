@@ -24,7 +24,16 @@ import { useTheme } from '@/hooks/use-theme';
 import { useBetting } from '@/store/betting';
 import { formatMoney } from '@/utils/format';
 
-type WalletAction = 'deposit' | 'withdraw';
+/**
+ * What the wallet sheet shows, captured when it opens. The sheet keeps rendering while it
+ * animates out, after the balance has already changed; deriving the slider range from the
+ * live balance collapsed it to zero width (min = max), which crashes the native slider.
+ */
+type WalletSheet = {
+  action: 'deposit' | 'withdraw';
+  startingBalance: number;
+  maxAmount: number;
+};
 
 const AMOUNT_STEP = 1_000;
 const MAX_DEPOSIT = 200_000;
@@ -33,7 +42,7 @@ export default function AccountScreen() {
   const theme = useTheme();
   const { balance, deposit, withdraw, oddsFormat, setOddsFormat } = useBetting();
 
-  const [walletAction, setWalletAction] = useState<WalletAction>('deposit');
+  const [walletSheet, setWalletSheet] = useState<WalletSheet>();
   const [isWalletSheetPresented, setIsWalletSheetPresented] = useState(false);
   const [amount, setAmount] = useState(10_000);
 
@@ -47,17 +56,16 @@ export default function AccountScreen() {
   const [weeklyLimit, setWeeklyLimit] = useState(100_000);
 
   const maxWithdrawal = Math.floor(balance / AMOUNT_STEP) * AMOUNT_STEP;
-  const maxAmount = walletAction === 'deposit' ? MAX_DEPOSIT : maxWithdrawal;
 
-  function openWalletSheet(action: WalletAction) {
-    const max = action === 'deposit' ? MAX_DEPOSIT : maxWithdrawal;
-    setWalletAction(action);
-    setAmount((current) => Math.min(current, max));
+  function openWalletSheet(action: WalletSheet['action']) {
+    const maxAmount = action === 'deposit' ? MAX_DEPOSIT : maxWithdrawal;
+    setWalletSheet({ action, startingBalance: balance, maxAmount });
+    setAmount((current) => Math.min(current, maxAmount));
     setIsWalletSheetPresented(true);
   }
 
-  function confirmWalletAction() {
-    if (walletAction === 'deposit') {
+  function confirmWalletAction(sheet: WalletSheet) {
+    if (sheet.action === 'deposit') {
       deposit(amount);
     } else {
       withdraw(amount);
@@ -166,36 +174,41 @@ export default function AccountScreen() {
       <AppBottomSheet
         isPresented={isWalletSheetPresented}
         onDismiss={() => setIsWalletSheetPresented(false)}>
-        <Column spacing={Spacing.three} modifiers={stretch.fullWidth}>
-          <Text textStyle={Typography.title}>
-            {walletAction === 'deposit' ? 'Deposit funds' : 'Withdraw funds'}
-          </Text>
-          <Column alignment="center" spacing={Spacing.one} modifiers={stretch.fullWidth}>
-            <Text textStyle={{ fontSize: 34, fontWeight: '700' }}>{formatMoney(amount)}</Text>
-            <Text textStyle={{ ...Typography.footnote, color: theme.textSecondary }}>
-              {`Balance after: ${formatMoney(
-                walletAction === 'deposit' ? balance + amount : balance - amount
-              )}`}
+        {walletSheet ? (
+          <Column spacing={Spacing.three} modifiers={stretch.fullWidth}>
+            <Text textStyle={Typography.title}>
+              {walletSheet.action === 'deposit' ? 'Deposit funds' : 'Withdraw funds'}
             </Text>
+            <Column alignment="center" spacing={Spacing.one} modifiers={stretch.fullWidth}>
+              <Text textStyle={{ fontSize: 34, fontWeight: '700' }}>{formatMoney(amount)}</Text>
+              <Text textStyle={{ ...Typography.footnote, color: theme.textSecondary }}>
+                {`Balance after: ${formatMoney(
+                  walletSheet.action === 'deposit'
+                    ? walletSheet.startingBalance + amount
+                    : walletSheet.startingBalance - amount
+                )}`}
+              </Text>
+            </Column>
+            {/* Starts at 0 so the range is never empty: Withdraw is disabled below ₦1,000. */}
+            <Slider
+              value={amount}
+              onValueChange={setAmount}
+              min={0}
+              max={walletSheet.maxAmount}
+              step={AMOUNT_STEP}
+            />
+            <FullWidthButton
+              label={walletSheet.action === 'deposit' ? 'Deposit' : 'Withdraw'}
+              disabled={amount <= 0 || amount > walletSheet.maxAmount}
+              onPress={() => confirmWalletAction(walletSheet)}
+            />
+            <FullWidthButton
+              label="Cancel"
+              variant="text"
+              onPress={() => setIsWalletSheetPresented(false)}
+            />
           </Column>
-          <Slider
-            value={amount}
-            onValueChange={setAmount}
-            min={AMOUNT_STEP}
-            max={Math.max(maxAmount, AMOUNT_STEP)}
-            step={AMOUNT_STEP}
-          />
-          <FullWidthButton
-            label={walletAction === 'deposit' ? 'Deposit' : 'Withdraw'}
-            disabled={amount > maxAmount}
-            onPress={confirmWalletAction}
-          />
-          <FullWidthButton
-            label="Cancel"
-            variant="text"
-            onPress={() => setIsWalletSheetPresented(false)}
-          />
-        </Column>
+        ) : null}
       </AppBottomSheet>
     </>
   );
