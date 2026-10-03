@@ -19,6 +19,7 @@ export default function MatchesLayout({ segment }: { segment: string }) {
       ) : (
         <Stack.Screen name="index" options={{ title: 'Sports' }} />
       )}
+      <Stack.Screen name="match/[id]" options={{ headerLargeTitleEnabled: false }} />
     </Stack>
   );
 }

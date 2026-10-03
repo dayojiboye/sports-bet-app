@@ -1,4 +1,5 @@
 import { Column, Row, Spacer, Text } from '@expo/ui';
+import { router } from 'expo-router';
 
 import { OddsButton } from '@/components/odds-button';
 import { Spacing, Typography } from '@/constants/theme';
@@ -11,23 +12,30 @@ type MatchRowProps = {
   showCompetition?: boolean;
 };
 
-/** Match summary with live score and the main market's prices. */
+/**
+ * Match summary with live score and the main market's prices. Tapping the summary opens the
+ * match's full market list.
+ */
 export function MatchRow({ match, showCompetition = false }: MatchRowProps) {
   const theme = useTheme();
   const [mainMarket] = match.markets;
   const score = match.status.state === 'live' ? match.status.score : undefined;
+  const secondaryCaption = { ...Typography.caption, color: theme.textSecondary };
 
   return (
     <Column spacing={Spacing.three}>
-      <Column spacing={Spacing.one}>
-        <Row alignment="center" spacing={Spacing.two}>
+      <Column
+        spacing={Spacing.one}
+        onPress={() => router.push({ pathname: '/match/[id]', params: { id: match.id } })}>
+        <Row alignment="center" spacing={Spacing.one}>
           <MatchStatusText status={match.status} />
-          <Spacer flexible />
           {showCompetition ? (
-            <Text textStyle={{ ...Typography.caption, color: theme.textSecondary }}>
-              {match.competition}
+            <Text textStyle={secondaryCaption} numberOfLines={1}>
+              {`· ${match.competition}`}
             </Text>
           ) : null}
+          <Spacer flexible />
+          <Text textStyle={secondaryCaption}>{`${match.markets.length} markets ›`}</Text>
         </Row>
         <TeamLine name={match.home} score={score?.[0]} />
         <TeamLine name={match.away} score={score?.[1]} />
