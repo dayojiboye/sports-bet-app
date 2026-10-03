@@ -37,9 +37,10 @@ function AppTabs() {
       <NativeTabs.Trigger name="(slip)">
         <NativeTabs.Trigger.Icon sf="ticket.fill" md="receipt_long" />
         <NativeTabs.Trigger.Label>Bet Slip</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Badge hidden={selections.length === 0}>
-          {String(selections.length)}
-        </NativeTabs.Trigger.Badge>
+        {/* Rendered conditionally: `hidden` is ignored when the badge has text. */}
+        {selections.length > 0 ? (
+          <NativeTabs.Trigger.Badge>{String(selections.length)}</NativeTabs.Trigger.Badge>
+        ) : null}
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="(bets)">
